@@ -17,6 +17,7 @@ import InputText from 'primevue/inputtext';
 import ConfirmDialog from 'primevue/confirmdialog';
 import Toast from 'primevue/toast';
 import ConfirmationService from 'primevue/confirmationservice';
+import Provider from './app/Service/Provider.mjs';
 
 
 const app = createApp(App);
@@ -37,4 +38,5 @@ app.use(router)
     .use(PrimeVue)
     .use(VueAxios, axios)
     .use(ConfirmationService)
+    .use(Provider)
     .mount('#app')

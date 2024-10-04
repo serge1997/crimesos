@@ -41,11 +41,11 @@
                     </div>
                     <div class="col-md-10 d-flex flex-column mb-3">
                         <label for="" class="form-label">Complement</label>
-                        <InputText placeholder="complement de l'address" />
+                        <InputText v-model="addressFinded.complement" placeholder="complement de l'address" />
                     </div>
                     <div class="col-md-10 d-flex flex-column mt-2">
                         <label for="" class="form-label">Description</label>
-                        <Textarea placeholder="donnez une breve description de l'alerte" />
+                        <Textarea v-model="addressFinded.addressFinded" placeholder="donnez une breve description de l'alerte" />
                     </div>
                     <div class="col-md-10 d-flex flex-column mt-3 p-3">
                        <Button @click="sendAlerte" label="Envoyer l'alerte" />
@@ -70,6 +70,7 @@
         </div>
     </Dialog>
     <ConfirmDialog>
+
     </ConfirmDialog>
 </template>
 <script>
@@ -99,6 +100,8 @@ export default{
                 sector: null,
                 number: null,
                 addressResume: null,
+                complement: null,
+                alert_description: null
             },
             confirm: useConfirm()
         }
@@ -142,15 +145,8 @@ export default{
                 message: "Confirmez l'envoi de l'alerte ?",
                 header: 'Avis',
                 icon: 'pi pi-exclamation-triangle',
-                rejectProps: {
-                    label: 'Annuler',
-                    severity: 'secondary',
-                    icon: 'pi pi-times',
-                    outlined: true
-                },
-                acceptProps: {
-                    label: 'Confirmer'
-                },
+                rejectLabel: 'Annuler',
+                acceptLabel: 'Confirmer',
                 accept: () => {
                     alert("accepted")
                 },
@@ -167,11 +163,8 @@ export default{
                 message: "Alerte annulée",
                 header: 'Avis',
                 icon: 'pi pi-times',
-                rejectProps: {
-                    label: 'OK',
-                    severity: 'danger',
-                    outlined: true
-                },
+                rejectLabel: ' ',
+                acceptLabel: 'Ok',
                 reject: () => {
                     return false;
                 }
@@ -179,6 +172,7 @@ export default{
         }
     },
     mounted(){
+        console.log(this.Api.get());
     }
 }
 </script>
