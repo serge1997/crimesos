@@ -1,4 +1,5 @@
 import { Api } from "./Api.mjs";
+import { Notify } from "./Notify";
 
 export class Container{
     #bindings;
@@ -10,6 +11,7 @@ export class Container{
 
     resolve(){
         this.bind('Api', () => {return new Api()});
+        this.bind('Notify', () => new Notify());
     }
 
     bind(key, callback){

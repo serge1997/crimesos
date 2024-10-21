@@ -33,10 +33,13 @@ app.component('Textarea', Textarea);
 app.component('InputText', InputText);
 app.component('ConfirmDialog', ConfirmDialog)
 app.component('Toast', Toast);
+import ElementPlus from 'element-plus'
+import 'element-plus/dist/index.css'
 
 app.use(router)
     .use(PrimeVue)
     .use(VueAxios, axios)
     .use(ConfirmationService)
     .use(Provider)
+    .use(ElementPlus)
     .mount('#app')

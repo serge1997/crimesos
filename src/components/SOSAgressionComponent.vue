@@ -29,12 +29,20 @@
                             <span class="px-3">{{addressFinded.sector}}</span>
                         </Chip>
                     </div>
+                    <div id="sector-inputbox" class="w-100 d-none mt-2 d-flex flex-column">
+                        <InputText class="w-75" placeholder="le nom du quartier" v-model="addressFinded.sector" />
+                        <small class="text text-danger">informez le nom du secteur</small>
+                    </div>
                     <div class="col-md-10 d-flex flex-column mb-2">
                         <label for="" class="form-label">Rue</label>
                         <Chip class="p-0 w-auto">
                             <span style="width: 2rem; height: 2rem;" class="rounded-circle d-flex align-items-center justify-content-center"><i class="pi pi-chevron-circle-right"></i></span>
-                            <span class="px-3">{{addressFinded.streetName}}</span>
+                            <span class="px-3">{{addressFinded.street_name}}</span>
                         </Chip>
+                    </div>
+                    <div id="streetName-inputbox" class="w-100 d-none mt-2 d-flex flex-column mb-2">
+                        <InputText class="w-75" placeholder="le nom du quartier" v-model="addressFinded.street_name" />
+                        <small class="text text-danger">informez le nom de la rue</small>
                     </div>
                     <div class="col-md-10 d-flex flex-column mb-3">
                         <label for="" class="form-label">Resume de l'address</label>
@@ -100,7 +108,7 @@ export default{
                 address: null,
                 municipality: null,
                 neighbourhood: null,
-                streetName: null,
+                street_name: null,
                 sector: null,
                 number: null,
                 addressResume: null,
@@ -128,16 +136,19 @@ export default{
             .then(async response => {
                 const toJson= xml2js(response.data);
                 let neighbourhoodInput = document.getElementById('neighbourhood-inputbox');
+                let sectorInput = document.getElementById('sector-inputbox');
+                let streetNameInput = document.getElementById('streetName-inputbox');
                 this.addressFinded.address = toJson.elements[0].elements;
                 this.addressFinded.addressResume = this.addressFinded.address[0].elements[0].text;
                 const allAddress = this.addressFinded.address[1].elements;
-                this.addressFinded.streetName = null;
+                this.addressFinded.street_name = null;
                 this.addressFinded.neighbourhood = null;
                 this.addressFinded.sector = null;
                 this.addressFinded.municipality = null;
                 for(let add of allAddress){
                     if (add.name == 'road'){
-                        this.addressFinded.streetName = add.elements[0].text
+                        streetNameInput.classList.add('d-none');
+                        this.addressFinded.street_name = add.elements[0].text
                     }
                     if (add.name == 'suburb'){
                         neighbourhoodInput.classList.add('d-none')
@@ -145,6 +156,7 @@ export default{
                     }
 
                     if (add.name == 'neighbourhood'){
+                        sectorInput.classList.add('d-none')
                         this.addressFinded.sector = add.elements[0].text
                     }
                     if (add.name == 'city'){
@@ -157,6 +169,15 @@ export default{
                 if (this.addressFinded.neighbourhood == null){
                     neighbourhoodInput.classList.remove('d-none')
                 }
+                if (this.addressFinded.street_name == null){
+                    sectorInput.classList.remove('d-none')
+                }
+                if (this.addressFinded.sector == null){
+                    streetNameInput.classList.remove('d-none')
+                }
+                if (this.addressFinded.addressResume.includes('Plateau')){
+                    this.addressFinded.municipality = 'Plateau';
+                }
             })
         },
         sendAlerte(){
@@ -167,8 +188,18 @@ export default{
                 rejectLabel: 'Annuler',
                 acceptLabel: 'Confirmer',
                 accept: () => {
-                    console.log(this.spappBaseUrl);
-                    this.Api.post(`${this.spappBaseUrl}/v1/address`, this.addressFinded)
+                    try{
+                        console.log(this.addressFinded);
+                        this.validateForm();
+                        this.Api.post(`${this.spappBaseUrl}/v1/address`, this.addressFinded)
+                        .then(async response => {
+                            this.Notify.success(await response.data.message);
+                        }).catch(error => {
+                            console.log(error);
+                        })
+                    }catch(error){
+                        this.Notify.error(error.message)
+                    }
                 },
                 reject: () => {
                     setTimeout(() => {
@@ -189,9 +220,18 @@ export default{
                     return false;
                 }
             })
+        },
+        validateForm(){
+            if (!this.addressFinded.neighbourhood){
+                throw new Error("Le quartier est obligatoire");
+            }
+            if (this.addressFinded.street_name == null && this.addressFinded.sector == null){
+                throw new Error("Informez le nom de la rue ou le secteur pour continuer");
+            }
         }
     },
     mounted(){
+        
     }
 }
 </script>
