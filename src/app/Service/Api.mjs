@@ -1,11 +1,12 @@
+import axios from "axios";
 
 export class Api {
 
-    get(url, params = {}){
-
+    async get(url, params = {}){
+        return await axios.get('url')
     }
 
-    post(url, params = {}, data = {}){
-
+    async post(url, data, params = null){
+        return await axios.post(url, data);
     }
 }

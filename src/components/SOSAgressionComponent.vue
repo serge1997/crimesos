@@ -17,6 +17,10 @@
                             <span style="width: 2rem; height: 2rem;" class="rounded-circle d-flex align-items-center justify-content-center"><i class="pi pi-chevron-circle-right"></i></span>
                             <span class="px-3">{{addressFinded.neighbourhood}}</span>
                         </Chip>
+                        <div id="neighbourhood-inputbox" class="w-100 d-none mt-2 d-flex flex-column">
+                            <InputText class="w-75" placeholder="le nom du quartier" v-model="addressFinded.neighbourhood" />
+                            <small class="text text-danger">informez le nom du quartier</small>
+                        </div>
                     </div>
                     <div class="col-md-10 d-flex flex-column mb-2">
                         <label for="" class="form-label">Zone</label>
@@ -101,7 +105,11 @@ export default{
                 number: null,
                 addressResume: null,
                 complement: null,
-                alert_description: null
+                alert_description: null,
+                city: null,
+                origin: "Agent spapp",
+                latitude: null,
+                longitude: null,
             },
             confirm: useConfirm()
         }
@@ -111,12 +119,15 @@ export default{
             const geoData = marker.target._latlng;
             console.log(marker.target._latlng)
             this.loadLatLngAddress(geoData.lat, geoData.lng);
+            this.addressFinded.latitude = marker.target._latlng.lat;
+            this.addressFinded.longitude = marker.target._latlng.lng;
 
         },
         loadLatLngAddress(lat, lng){
             this.axios.get(this.apiUrl + `lat=${lat}&lon=${lng}`)
             .then(async response => {
                 const toJson= xml2js(response.data);
+                let neighbourhoodInput = document.getElementById('neighbourhood-inputbox');
                 this.addressFinded.address = toJson.elements[0].elements;
                 this.addressFinded.addressResume = this.addressFinded.address[0].elements[0].text;
                 const allAddress = this.addressFinded.address[1].elements;
@@ -129,14 +140,22 @@ export default{
                         this.addressFinded.streetName = add.elements[0].text
                     }
                     if (add.name == 'suburb'){
+                        neighbourhoodInput.classList.add('d-none')
                         this.addressFinded.neighbourhood = add.elements[0].text
                     }
+
                     if (add.name == 'neighbourhood'){
                         this.addressFinded.sector = add.elements[0].text
                     }
                     if (add.name == 'city'){
                         this.addressFinded.municipality = add.elements[0].text
                     }
+                    if (add.name == 'state'){
+                        this.addressFinded.city = add.elements[0].text
+                    }
+                }
+                if (this.addressFinded.neighbourhood == null){
+                    neighbourhoodInput.classList.remove('d-none')
                 }
             })
         },
@@ -148,7 +167,8 @@ export default{
                 rejectLabel: 'Annuler',
                 acceptLabel: 'Confirmer',
                 accept: () => {
-                    alert("accepted")
+                    console.log(this.spappBaseUrl);
+                    this.Api.post(`${this.spappBaseUrl}/v1/address`, this.addressFinded)
                 },
                 reject: () => {
                     setTimeout(() => {
@@ -172,7 +192,6 @@ export default{
         }
     },
     mounted(){
-        console.log(this.Api.get());
     }
 }
 </script>
